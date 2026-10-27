@@ -81,9 +81,10 @@ export function startServer() {
   runMigrations();
   seedDatabase(false);
 
-  server.listen(config.port, '127.0.0.1', () => {
-    console.log(`[Backend] RegTech Sentinel API listening on http://127.0.0.1:${config.port}`);
-    console.log(`[Backend] WebSocket real-time gateway active on ws://127.0.0.1:${config.port}`);
+  const host = process.env.HOST || '0.0.0.0';
+  server.listen(config.port, host, () => {
+    console.log(`[Backend] RegTech Sentinel API listening on http://${host}:${config.port}`);
+    console.log(`[Backend] WebSocket real-time gateway active on ws://${host}:${config.port}`);
   });
 
   return server;
@@ -93,4 +94,5 @@ if (process.argv[1]?.endsWith('index.ts') || process.argv[1]?.endsWith('index.js
   startServer();
 }
 
+export default app;
 export { app, server, io };

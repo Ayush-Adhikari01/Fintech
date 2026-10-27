@@ -16,7 +16,9 @@ router.get('/', async (req: Request, res: Response) => {
   let mlStatus = 'UNAVAILABLE';
   let mlVersion = 'none';
   try {
-    const mlRes = await fetch(`${config.mlServiceUrl}/health`, { signal: AbortSignal.timeout(1200) });
+    const baseUrl = config.mlServiceUrl.endsWith('/') ? config.mlServiceUrl : `${config.mlServiceUrl}/`;
+    const targetUrl = new URL('health', baseUrl);
+    const mlRes = await fetch(targetUrl, { signal: AbortSignal.timeout(1200) });
     if (mlRes.ok) {
       const mlData = (await mlRes.json()) as any;
       mlStatus = mlData.status === 'healthy' ? 'HEALTHY' : 'DEGRADED';

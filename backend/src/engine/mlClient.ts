@@ -62,7 +62,10 @@ export async function queryMLInference(input: MLPredictionInput): Promise<MLPred
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2000);
 
-    const response = await fetch(`${config.mlServiceUrl}/predict`, {
+    const baseUrl = config.mlServiceUrl.endsWith('/') ? config.mlServiceUrl : `${config.mlServiceUrl}/`;
+    const targetUrl = new URL('predict', baseUrl);
+
+    const response = await fetch(targetUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),

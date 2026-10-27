@@ -169,7 +169,9 @@ export async function getDashboardData(): Promise<DashboardMetrics> {
   // 10. Check ML Service Health
   let mlServiceStatus = 'UNAVAILABLE';
   try {
-    const mlCheck = await fetch(`${config.mlServiceUrl}/health`, { signal: AbortSignal.timeout(1000) });
+    const baseUrl = config.mlServiceUrl.endsWith('/') ? config.mlServiceUrl : `${config.mlServiceUrl}/`;
+    const targetUrl = new URL('health', baseUrl);
+    const mlCheck = await fetch(targetUrl, { signal: AbortSignal.timeout(1000) });
     if (mlCheck.ok) {
       const mlData = (await mlCheck.json()) as any;
       mlServiceStatus = mlData.status === 'healthy' ? 'HEALTHY' : 'DEGRADED';

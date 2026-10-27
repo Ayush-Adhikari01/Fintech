@@ -154,6 +154,7 @@ def retrain():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
+    host = os.environ.get("HOST", "0.0.0.0")
     port = int(os.environ.get("PORT", os.environ.get("ML_PORT", 5050)))
-    logger.info(f"Starting RegTech ML Inference Service on port {port}...")
-    app.run(host="127.0.0.1", port=port, debug=False)
+    logger.info(f"Starting RegTech ML Inference Service on {host}:{port}...")
+    app.run(host=host, port=port, debug=False)
