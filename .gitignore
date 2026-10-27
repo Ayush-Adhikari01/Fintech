@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+
+# Builds
+dist/
+build/
+.vite/
+
+# Database
+data/*.db
+data/*.db-wal
+data/*.db-shm
+*.sqlite
+*.sqlite3
+
+# Environment
+.env
+.env.local
+
+# Logs & temp
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ML artifacts generated at runtime (keep checked in models or train on setup)
+ml_service/*.joblib
+ml_service/model.joblib
+ml_service/scaler.joblib
+
+# OS
+.DS_Store
+Thumbs.db

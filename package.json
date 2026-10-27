@@ -1,0 +1,13 @@
+{
+  "name": "regtech-sentinel",
+  "version": "1.0.0",
+  "description": "RegTech Sentinel — Real-Time Risk Intelligence Platform",
+  "scripts": {
+    "test": "powershell -ExecutionPolicy Bypass -File ./test-all.ps1",
+    "start": "powershell -ExecutionPolicy Bypass -File ./start-demo.ps1",
+    "stop": "powershell -ExecutionPolicy Bypass -File ./stop-demo.ps1",
+    "reset": "powershell -ExecutionPolicy Bypass -File ./reset-demo.ps1"
+  },
+  "author": "Antigravity Engineering Team",
+  "license": "ISC"
+}
