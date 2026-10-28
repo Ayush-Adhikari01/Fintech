@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { mockEngine } from '../services/mockEngine';
+import { setUseMockEngine } from '../services/api';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -19,7 +21,7 @@ interface SocketContextType {
 const SocketContext = createContext<SocketContextType>({
   socket: null,
   isConnected: false,
-  simulatorStatus: { isRunning: false, isPaused: false, intervalMs: 3000, generatedCount: 0 },
+  simulatorStatus: { isRunning: true, isPaused: false, intervalMs: 3000, generatedCount: 0 },
   lastTransaction: null,
   lastAlert: null,
   unreadAlertsCount: 0,
@@ -30,7 +32,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [simulatorStatus, setSimulatorStatus] = useState({
-    isRunning: false,
+    isRunning: true,
     isPaused: false,
     intervalMs: 3000,
     generatedCount: 0,
@@ -40,41 +42,90 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [unreadAlertsCount, setUnreadAlertsCount] = useState<number>(0);
 
   useEffect(() => {
-    // Connect to backend Socket.IO
-    const s = io(window.location.origin, {
-      path: '/socket.io',
-      reconnectionAttempts: 10,
-      reconnectionDelay: 1500,
-      autoConnect: true,
-    });
+    let hasConnected = false;
+    let fallbackActive = false;
 
-    s.on('connect', () => {
-      console.log('[Socket] Connected to RegTech Sentinel gateway:', s.id);
+    // Activate virtual cloud simulation engine
+    const activateFallback = () => {
+      if (fallbackActive || hasConnected) return;
+      fallbackActive = true;
+      setUseMockEngine(true);
       setIsConnected(true);
-    });
+      setSimulatorStatus(mockEngine.getSimulatorStatus());
+      console.log('[Socket] Activated Interactive Cloud Demo Engine');
 
-    s.on('disconnect', () => {
-      console.log('[Socket] Disconnected from gateway');
-      setIsConnected(false);
-    });
+      mockEngine.on('simulator:status', (status) => {
+        setSimulatorStatus(status);
+      });
 
-    s.on('simulator:status', (status) => {
-      setSimulatorStatus(status);
-    });
+      mockEngine.on('transaction:new', (data) => {
+        setLastTransaction(data);
+      });
 
-    s.on('transaction:new', (data) => {
-      setLastTransaction(data);
-    });
+      mockEngine.on('alert:new', (alert) => {
+        setLastAlert(alert);
+        setUnreadAlertsCount((prev) => prev + 1);
+      });
+    };
 
-    s.on('alert:new', (alert) => {
-      setLastAlert(alert);
-      setUnreadAlertsCount((prev) => prev + 1);
-    });
+    // Fast probe fallback timer: if socket doesn't connect within 1.5s, switch to cloud engine
+    const probeTimer = setTimeout(() => {
+      if (!hasConnected) {
+        activateFallback();
+      }
+    }, 1500);
 
-    setSocket(s);
+    // Try connecting to real backend Socket.IO (for local or server-hosted setups)
+    let s: Socket | null = null;
+    try {
+      s = io(window.location.origin, {
+        path: '/socket.io',
+        reconnectionAttempts: 2,
+        reconnectionDelay: 1000,
+        timeout: 2000,
+        autoConnect: true,
+      });
+
+      s.on('connect', () => {
+        hasConnected = true;
+        clearTimeout(probeTimer);
+        console.log('[Socket] Connected to RegTech Sentinel gateway:', s?.id);
+        setIsConnected(true);
+      });
+
+      s.on('disconnect', () => {
+        if (!fallbackActive) {
+          setIsConnected(false);
+        }
+      });
+
+      s.on('connect_error', () => {
+        activateFallback();
+      });
+
+      s.on('simulator:status', (status) => {
+        setSimulatorStatus(status);
+      });
+
+      s.on('transaction:new', (data) => {
+        setLastTransaction(data);
+      });
+
+      s.on('alert:new', (alert) => {
+        setLastAlert(alert);
+        setUnreadAlertsCount((prev) => prev + 1);
+      });
+
+      setSocket(s);
+    } catch {
+      activateFallback();
+    }
 
     return () => {
-      s.disconnect();
+      clearTimeout(probeTimer);
+      if (s) {
+        s.disconnect();
+      }
     };
   }, []);
 

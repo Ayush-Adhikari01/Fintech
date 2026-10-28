@@ -41,7 +41,7 @@ export const Header: React.FC = () => {
               ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
               : 'bg-red-50 text-red-700 border-red-200'
           }`}
-          title={isConnected ? 'Connected to local WebSocket server' : 'Connecting to local server...'}
+          title={isConnected ? 'Real-time Risk Intelligence Engine active' : 'Connecting to server...'}
         >
           {isConnected ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5 animate-pulse" />}
           <span>{isConnected ? 'LIVE ENGINE' : 'OFFLINE'}</span>

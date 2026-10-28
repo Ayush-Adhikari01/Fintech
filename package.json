@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "RegTech Sentinel — Real-Time Risk Intelligence Platform",
   "scripts": {
+    "build": "npm run build --prefix frontend",
     "test": "powershell -ExecutionPolicy Bypass -File ./test-all.ps1",
     "start": "powershell -ExecutionPolicy Bypass -File ./start-demo.ps1",
     "stop": "powershell -ExecutionPolicy Bypass -File ./stop-demo.ps1",
