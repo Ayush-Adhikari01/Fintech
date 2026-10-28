@@ -73,16 +73,16 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       if (!hasConnected) {
         activateFallback();
       }
-    }, 1500);
+    }, 12000);
 
     // Try connecting to real backend Socket.IO (for local or server-hosted setups)
     let s: Socket | null = null;
     try {
-      s = io(window.location.origin, {
+      s = io('https://regtech-backend-q7wj.onrender.com', {
         path: '/socket.io',
         reconnectionAttempts: 2,
         reconnectionDelay: 1000,
-        timeout: 2000,
+        timeout: 10000,
         autoConnect: true,
       });
 
@@ -99,9 +99,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
       });
 
-      s.on('connect_error', () => {
-        activateFallback();
-      });
+      s.on('connect_error', (error) => {
+  console.error('[Socket] Connection failed:', error.message);
+});
 
       s.on('simulator:status', (status) => {
         setSimulatorStatus(status);
