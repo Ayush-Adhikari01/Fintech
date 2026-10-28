@@ -1,6 +1,6 @@
 import { mockEngine } from './mockEngine';
 
-const API_BASE = '/api';
+const API_BASE = 'https://regtech-backend-q7wj.onrender.com/api';
 
 // Tracks whether the browser has switched to in-memory demo engine
 let useMockEngine = false;
